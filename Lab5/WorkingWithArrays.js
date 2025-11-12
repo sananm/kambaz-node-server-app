@@ -41,6 +41,10 @@ export default function WorkingWithArrays(app) {
   app.get("/lab5/todos/:id/delete", (req, res) => {
     const { id } = req.params;
     const todoIndex = todos.findIndex((t) => t.id === parseInt(id));
+    if (todoIndex === -1) {
+      res.status(404).json({ message: `Unable to delete Todo with ID ${id}` });
+      return;
+    }
     todos.splice(todoIndex, 1);
     res.json(todos);
   });
@@ -48,30 +52,36 @@ export default function WorkingWithArrays(app) {
   // Update todo title
   app.get("/lab5/todos/:id/title/:title", (req, res) => {
     const { id, title } = req.params;
-    const todo = todos.find((t) => t.id === parseInt(id));
-    if (todo) {
-      todo.title = title;
+    const todoIndex = todos.findIndex((t) => t.id === parseInt(id));
+    if (todoIndex === -1) {
+      res.status(404).json({ message: `Unable to update Todo with ID ${id}` });
+      return;
     }
+    todos[todoIndex].title = title;
     res.json(todos);
   });
 
   // Update completed status
   app.get("/lab5/todos/:id/completed/:completed", (req, res) => {
     const { id, completed } = req.params;
-    const todo = todos.find((t) => t.id === parseInt(id));
-    if (todo) {
-      todo.completed = completed === "true";
+    const todoIndex = todos.findIndex((t) => t.id === parseInt(id));
+    if (todoIndex === -1) {
+      res.status(404).json({ message: `Unable to update Todo with ID ${id}` });
+      return;
     }
+    todos[todoIndex].completed = completed === "true";
     res.json(todos);
   });
 
   // Update description
   app.get("/lab5/todos/:id/description/:description", (req, res) => {
     const { id, description } = req.params;
-    const todo = todos.find((t) => t.id === parseInt(id));
-    if (todo) {
-      todo.description = description;
+    const todoIndex = todos.findIndex((t) => t.id === parseInt(id));
+    if (todoIndex === -1) {
+      res.status(404).json({ message: `Unable to update Todo with ID ${id}` });
+      return;
     }
+    todos[todoIndex].description = description;
     res.json(todos);
   });
 
