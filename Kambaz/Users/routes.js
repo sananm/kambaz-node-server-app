@@ -11,16 +11,25 @@ export default function UserRoutes(app, db) {
     }
     const currentUser = dao.createUser(req.body);
     req.session["currentUser"] = currentUser;
+    console.log("Signup - Session ID:", req.sessionID);
+    console.log("Signup - User saved to session:", currentUser._id);
     res.json(currentUser);
   };
 
   const signin = (req, res) => {
     const { username, password } = req.body;
+    console.log("Signin attempt - Username:", username);
+    console.log("Signin - Session ID:", req.sessionID);
+    console.log("Signin - Request origin:", req.headers.origin);
+    
     const currentUser = dao.findUserByCredentials(username, password);
     if (currentUser) {
       req.session["currentUser"] = currentUser;
+      console.log("Signin successful - User ID:", currentUser._id);
+      console.log("Signin - Session after save:", req.session);
       res.json(currentUser);
     } else {
+      console.log("Signin failed - Invalid credentials");
       res.status(401).json({ message: "Unable to login. Try again later." });
     }
   };
@@ -36,11 +45,18 @@ export default function UserRoutes(app, db) {
   };
 
   const profile = (req, res) => {
+    console.log("Profile - Session ID:", req.sessionID);
+    console.log("Profile - Full session:", req.session);
+    console.log("Profile - Cookies:", req.headers.cookie);
+    console.log("Profile - Request origin:", req.headers.origin);
+    
     const currentUser = req.session["currentUser"];
     if (!currentUser) {
+      console.log("Profile - No user in session, returning 401");
       res.sendStatus(401);
       return;
     }
+    console.log("Profile - Found user:", currentUser._id);
     res.json(currentUser);
   };
 
