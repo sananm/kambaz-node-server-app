@@ -15,8 +15,8 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   process.env.CLIENT_URL,
-  "https://kambaz-next-js.vercel.app",
-  /\.vercel\.app$/, // Allow all Vercel preview URLs
+  "https://kambaz-next-js-neon-seven.vercel.app",
+  /vercel\.app$/, // Match all Vercel domains
 ];
 
 const corsOptions = {
@@ -25,13 +25,13 @@ const corsOptions = {
     // Allow requests with no origin (mobile apps, Postman, etc)
     if (!origin) return callback(null, true);
 
-    if (
-      allowedOrigins.some((allowed) => {
-        if (typeof allowed === "string") return allowed === origin;
-        if (allowed instanceof RegExp) return allowed.test(origin);
-        return false;
-      })
-    ) {
+    const isAllowed = allowedOrigins.some((allowed) => {
+      if (typeof allowed === "string") return allowed === origin;
+      if (allowed instanceof RegExp) return allowed.test(origin);
+      return false;
+    });
+
+    if (isAllowed) {
       callback(null, true);
     } else {
       console.log("CORS blocked origin:", origin);
@@ -50,17 +50,28 @@ const sessionOptions = {
   cookie: {
     httpOnly: false,
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    secure: process.env.NODE_ENV === "production", // true in production, false in development
+    secure: process.env.NODE_ENV === "production",
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    domain: process.env.NODE_ENV === "production" ? undefined : undefined, // Let browser handle it
   },
 };
 
 if (process.env.NODE_ENV === "production") {
-  sessionOptions.proxy = true; // Trust first proxy (required for Render)
+  sessionOptions.proxy = true;
 }
 
 app.use(session(sessionOptions));
 app.use(express.json());
+
+// Add response header logging middleware
+app.use((req, res, next) => {
+  const originalJson = res.json;
+  res.json = function(data) {
+    console.log("Response headers:", res.getHeaders());
+    return originalJson.call(this, data);
+  };
+  next();
+});
 
 // Root route for health check
 app.get("/", (req, res) => {
