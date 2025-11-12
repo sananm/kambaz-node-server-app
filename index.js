@@ -43,25 +43,40 @@ const corsOptions = {
 // Apply CORS middleware
 app.use(cors(corsOptions));
 
+// Detect if running on Render or in production
+const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
+
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
+  proxy: isProduction, // Trust proxy for Render
   cookie: {
     httpOnly: false,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction, // Require HTTPS in production
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    domain: process.env.NODE_ENV === "production" ? undefined : undefined, // Let browser handle it
   },
 };
 
-if (process.env.NODE_ENV === "production") {
-  sessionOptions.proxy = true;
-}
+console.log("Session configuration:", {
+  isProduction,
+  sameSite: sessionOptions.cookie.sameSite,
+  secure: sessionOptions.cookie.secure,
+  proxy: sessionOptions.proxy
+});
 
 app.use(session(sessionOptions));
 app.use(express.json());
+
+// Debug middleware to log session info
+app.use((req, res, next) => {
+  console.log("Request:", req.method, req.path);
+  console.log("Session ID:", req.sessionID);
+  console.log("Session data:", req.session);
+  console.log("Cookies received:", req.headers.cookie);
+  next();
+});
 
 // Add response header logging middleware
 app.use((req, res, next) => {
