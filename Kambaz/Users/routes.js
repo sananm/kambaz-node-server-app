@@ -16,23 +16,22 @@ export default function UserRoutes(app, db) {
     res.json(currentUser);
   };
 
-  const signin = (req, res) => {
-    const { username, password } = req.body;
-    console.log("Signin attempt - Username:", username);
-    console.log("Signin - Session ID:", req.sessionID);
-    console.log("Signin - Request origin:", req.headers.origin);
-    
-    const currentUser = dao.findUserByCredentials(username, password);
-    if (currentUser) {
-      req.session["currentUser"] = currentUser;
-      console.log("Signin successful - User ID:", currentUser._id);
-      console.log("Signin - Session after save:", req.session);
-      res.json(currentUser);
-    } else {
-      console.log("Signin failed - Invalid credentials");
-      res.status(401).json({ message: "Unable to login. Try again later." });
-    }
-  };
+const signin = (req, res) => {
+  const { username, password } = req.body;
+  console.log("Signin attempt - Username:", username, "Password:", password);
+  console.log("Total users in database:", dao.findAllUsers().length);
+  console.log("All users:", JSON.stringify(dao.findAllUsers(), null, 2));
+  
+  const currentUser = dao.findUserByCredentials(username, password);
+  if (currentUser) {
+    req.session["currentUser"] = currentUser;
+    console.log("Signin successful - User ID:", currentUser._id);
+    res.json(currentUser);
+  } else {
+    console.log("Signin failed - Invalid credentials");
+    res.status(401).json({ message: "Unable to login. Try again later." });
+  }
+};
 
   const signout = (req, res) => {
     req.session.destroy((err) => {
