@@ -153,4 +153,18 @@ export default [
     lastActivity: "2020-11-10",
     totalActivity: "30:15:20",
   },
+  {
+    _id: "1000",
+    username: "sanan",
+    password: "sanan",
+    firstName: "Sanan",
+    lastName: "Moinuddin",
+    email: "sanan@kambaz.com",
+    dob: "2000-01-01",
+    role: "ADMIN",
+    loginId: "001234571A",
+    section: "S000",
+    lastActivity: "2025-11-12",
+    totalActivity: "100:00:00",
+  },
 ];
