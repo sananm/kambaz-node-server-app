@@ -19,8 +19,7 @@ const allowedOrigins = [
   /\.vercel\.app$/, // Allow all Vercel preview URLs
 ];
 
-// Handle preflight requests
-app.options('*', cors({
+const corsOptions = {
   credentials: true,
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, Postman, etc)
@@ -39,30 +38,10 @@ app.options('*', cors({
       callback(new Error("Not allowed by CORS"));
     }
   },
-}));
+};
 
-app.use(
-  cors({
-    credentials: true,
-    origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, Postman, etc)
-      if (!origin) return callback(null, true);
-
-      if (
-        allowedOrigins.some((allowed) => {
-          if (typeof allowed === "string") return allowed === origin;
-          if (allowed instanceof RegExp) return allowed.test(origin);
-          return false;
-        })
-      ) {
-        callback(null, true);
-      } else {
-        console.log("CORS blocked origin:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-  })
-);
+// Apply CORS middleware
+app.use(cors(corsOptions));
 
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
