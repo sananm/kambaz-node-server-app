@@ -13,7 +13,17 @@ export default function UserRoutes(app, db) {
     req.session["currentUser"] = currentUser;
     console.log("Signup - Session ID:", req.sessionID);
     console.log("Signup - User saved to session:", currentUser._id);
-    res.json(currentUser);
+
+    // Explicitly save session before responding
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        res.status(500).json({ message: "Error saving session" });
+      } else {
+        console.log("Signup - Session saved successfully");
+        res.json(currentUser);
+      }
+    });
   };
 
 const signin = (req, res) => {
@@ -48,7 +58,17 @@ const signin = (req, res) => {
 
     req.session["currentUser"] = currentUser;
     console.log("Signin successful - User ID:", currentUser._id);
-    res.json(currentUser);
+
+    // Explicitly save session before responding (important for cross-origin)
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        res.status(500).json({ message: "Error saving session" });
+      } else {
+        console.log("Session saved successfully");
+        res.json(currentUser);
+      }
+    });
   } else {
     console.log("Signin failed - Invalid credentials");
     res.status(401).json({ message: "Unable to login. Try again later." });
