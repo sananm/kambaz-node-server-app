@@ -36,4 +36,8 @@ export default function ModuleRoutes(app, db) {
   app.post("/api/courses/:courseId/modules", createModuleForCourse);
   app.delete("/api/modules/:moduleId", deleteModule);
   app.put("/api/modules/:moduleId", updateModule);
+
+  // Alternate routes with courseId in path (for Next.js compatibility)
+  app.delete("/api/courses/:courseId/modules/:moduleId", deleteModule);
+  app.put("/api/courses/:courseId/modules/:moduleId", updateModule);
 }

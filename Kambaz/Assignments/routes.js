@@ -36,4 +36,8 @@ export default function AssignmentRoutes(app, db) {
   app.post("/api/courses/:courseId/assignments", createAssignmentForCourse);
   app.delete("/api/assignments/:assignmentId", deleteAssignment);
   app.put("/api/assignments/:assignmentId", updateAssignment);
+
+  // Alternate routes with courseId in path (for Next.js compatibility)
+  app.delete("/api/courses/:courseId/assignments/:assignmentId", deleteAssignment);
+  app.put("/api/courses/:courseId/assignments/:assignmentId", updateAssignment);
 }

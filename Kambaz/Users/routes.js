@@ -21,9 +21,31 @@ const signin = (req, res) => {
   console.log("Signin attempt - Username:", username, "Password:", password);
   console.log("Total users in database:", dao.findAllUsers().length);
   console.log("All users:", JSON.stringify(dao.findAllUsers(), null, 2));
-  
+
   const currentUser = dao.findUserByCredentials(username, password);
   if (currentUser) {
+    // Auto-enroll faculty and admin in all courses
+    if (currentUser.role === 'FACULTY' || currentUser.role === 'ADMIN') {
+      const courses = db.courses;
+      const enrollments = db.enrollments;
+
+      courses.forEach((course) => {
+        // Check if already enrolled
+        const alreadyEnrolled = enrollments.some(
+          (e) => e.user === currentUser._id && e.course === course._id
+        );
+
+        // If not enrolled, create enrollment
+        if (!alreadyEnrolled) {
+          enrollments.push({
+            _id: new Date().getTime().toString() + Math.random(),
+            user: currentUser._id,
+            course: course._id,
+          });
+        }
+      });
+    }
+
     req.session["currentUser"] = currentUser;
     console.log("Signin successful - User ID:", currentUser._id);
     res.json(currentUser);
