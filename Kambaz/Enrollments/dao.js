@@ -14,5 +14,20 @@ export default function EnrollmentsDao(db) {
     );
   };
 
-  return { enrollUserInCourse, unenrollUserFromCourse };
+  const findEnrollmentsForUser = (userId) => {
+    const { enrollments } = db;
+    return enrollments.filter((enrollment) => enrollment.user === userId);
+  };
+
+  const findEnrollmentsForCourse = (courseId) => {
+    const { enrollments } = db;
+    return enrollments.filter((enrollment) => enrollment.course === courseId);
+  };
+
+  return {
+    enrollUserInCourse,
+    unenrollUserFromCourse,
+    findEnrollmentsForUser,
+    findEnrollmentsForCourse
+  };
 }

@@ -15,8 +15,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   process.env.CLIENT_URL,
-  "https://kambaz-next-js-neon-seven.vercel.app",
-  /vercel\.app$/, // Match all Vercel domains
+  /\.vercel\.app$/, // Match all Vercel domains
 ];
 
 const corsOptions = {
@@ -32,6 +31,7 @@ const corsOptions = {
     });
 
     if (isAllowed) {
+      console.log("CORS allowed origin:", origin);
       callback(null, true);
     } else {
       console.log("CORS blocked origin:", origin);
@@ -42,6 +42,9 @@ const corsOptions = {
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
