@@ -59,6 +59,15 @@ if (process.env.SERVER_ENV !== "development") {
 app.use(session(sessionOptions));
 app.use(express.json());
 
+// Root route for health check
+app.get("/", (req, res) => {
+  res.json({
+    message: "Kambaz Node Server is running",
+    status: "healthy",
+    timestamp: new Date().toISOString()
+  });
+});
+
 UserRoutes(app, db);
 CourseRoutes(app, db);
 ModuleRoutes(app, db);
