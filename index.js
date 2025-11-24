@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 import mongoose from "mongoose";
 import Lab5 from "./Lab5/index.js";
 import UserRoutes from "./Kambaz/Users/routes.js";
@@ -22,6 +23,14 @@ mongoose.connection.on("error", (err) => {
 });
 
 const app = express();
+
+// Detect if running on Render or in production
+const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
+
+// Trust proxy - MUST be before session middleware for secure cookies behind Render's proxy
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
 
 // More permissive CORS for Vercel
 const allowedOrigins = [
@@ -55,16 +64,16 @@ const corsOptions = {
 // Apply CORS middleware
 app.use(cors(corsOptions));
 
-// Detect if running on Render or in production
-const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
-
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
-  proxy: isProduction, // Trust proxy for Render
+  store: MongoStore.create({
+    mongoUrl: CONNECTION_STRING,
+    ttl: 24 * 60 * 60, // Session TTL in seconds (24 hours)
+  }),
   cookie: {
-    httpOnly: false,
+    httpOnly: true,
     sameSite: isProduction ? "none" : "lax",
     secure: isProduction, // Require HTTPS in production
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
@@ -75,7 +84,7 @@ console.log("Session configuration:", {
   isProduction,
   sameSite: sessionOptions.cookie.sameSite,
   secure: sessionOptions.cookie.secure,
-  proxy: sessionOptions.proxy
+  store: "MongoStore"
 });
 
 app.use(session(sessionOptions));
